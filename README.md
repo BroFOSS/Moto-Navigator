@@ -58,6 +58,11 @@ Import the project in Android Studio or use Gradle in command line:
 The result apk file will be placed in ```app/build/outputs/apk/```.
 
 ## Project License
+
+GNU General Public License v3.0
+
+## Other open source Licenses
+
 ```
 Copyright (C) 2017 Anupam Das
 
@@ -73,7 +78,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-## Other open source Licenses
 
 ### Android source code
 ```
