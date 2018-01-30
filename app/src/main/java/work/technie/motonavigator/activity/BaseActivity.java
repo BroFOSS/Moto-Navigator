@@ -47,6 +47,7 @@ import work.technie.motonavigator.fragment.AboutFragment;
 import work.technie.motonavigator.fragment.DriveCollectionFragment;
 import work.technie.motonavigator.fragment.DriveFragment;
 import work.technie.motonavigator.fragment.MapFragment;
+import work.technie.motonavigator.utils.Utility;
 
 /**
  * Created by anupam on 31/10/16.
@@ -63,6 +64,9 @@ public class BaseActivity extends AppCompatActivity
     private final String FRAGMENT_TAG_REST = "FTAGR";
     private int currentMenuItemId;
 
+    private FirebaseAuth mAuth;
+    private FirebaseUser user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,8 +74,8 @@ public class BaseActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = mAuth.getCurrentUser();
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
 
         View hView = navigationView.getHeaderView(0);
         TextView nav_user_name = (TextView) hView.findViewById(R.id.user_name);
@@ -163,6 +167,10 @@ public class BaseActivity extends AppCompatActivity
             case R.id.nav_sign_out:
                 signOut();
                 break;
+            case R.id.nav_backup:
+                if(user!=null) {
+                    Utility.backUpData(getApplicationContext(), user.getUid());
+                }
             default:
                 //nothing;
         }

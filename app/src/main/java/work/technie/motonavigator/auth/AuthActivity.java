@@ -31,9 +31,11 @@ package work.technie.motonavigator.auth;
  * limitations under the License.
  */
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -57,8 +59,14 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import work.technie.motonavigator.R;
+import work.technie.motonavigator.data.MotorContract;
 
 /**
  * Created by anupam on 29/10/16.
@@ -190,6 +198,71 @@ public class AuthActivity extends BaseActivity implements
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putInt(getString(R.string.login_mode), GOOGLE_SIGN_IN);
                 editor.apply();
+
+
+                final Uri waypointUri = MotorContract.Waypoints.buildWaypointUri();
+                this.getContentResolver().delete(waypointUri,null,null);
+
+                final Uri stepsUri = MotorContract.Steps.buildStepUri();
+                this.getContentResolver().delete(stepsUri,null,null);
+
+                if(mAuth.getCurrentUser() != null) {
+                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                    DatabaseReference waypointsRef = database.getReference(mAuth.getCurrentUser().getUid())
+                            .child("STEPS");
+                    waypointsRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for (DataSnapshot messageSnapshot : dataSnapshot.getChildren()) {
+                                ContentValues contentValue = new ContentValues();
+                                contentValue.put(MotorContract.Steps.ROUTE_ID, messageSnapshot.child(MotorContract.Steps.ROUTE_ID).getValue().toString());
+                                contentValue.put(MotorContract.Steps.BEARING_BEFORE, messageSnapshot.child(MotorContract.Steps.BEARING_BEFORE).getValue().toString());
+                                contentValue.put(MotorContract.Steps.BEARING_AFTER, messageSnapshot.child(MotorContract.Steps.BEARING_AFTER).getValue().toString());
+                                contentValue.put(MotorContract.Steps.LOCATION_LAT, messageSnapshot.child(MotorContract.Steps.LOCATION_LAT).getValue().toString());
+                                contentValue.put(MotorContract.Steps.LOCATION_LONG, messageSnapshot.child(MotorContract.Steps.LOCATION_LONG).getValue().toString());
+                                contentValue.put(MotorContract.Steps.TYPE, messageSnapshot.child(MotorContract.Steps.TYPE).getValue().toString());
+                                contentValue.put(MotorContract.Steps.INSTRUCTION, messageSnapshot.child(MotorContract.Steps.INSTRUCTION).getValue().toString());
+                                contentValue.put(MotorContract.Steps.MODE, messageSnapshot.child(MotorContract.Steps.MODE).getValue().toString());
+                                contentValue.put(MotorContract.Steps.DURATION, messageSnapshot.child(MotorContract.Steps.DURATION).getValue().toString());
+                                contentValue.put(MotorContract.Steps.NAME, messageSnapshot.child(MotorContract.Steps.NAME).getValue().toString());
+                                contentValue.put(MotorContract.Steps.DISTANCE, messageSnapshot.child(MotorContract.Steps.DISTANCE).getValue().toString());
+
+                                getApplicationContext().getContentResolver().insert(stepsUri, contentValue);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError firebaseError) {
+                        }
+                    });
+
+                    DatabaseReference stepRef = database.getReference(mAuth.getCurrentUser().getUid())
+                            .child("WAYPOINTS");
+                    stepRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for (DataSnapshot messageSnapshot : dataSnapshot.getChildren()) {
+                                ContentValues contentValue = new ContentValues();
+                                contentValue.put(MotorContract.Waypoints.ROUTE_ID, messageSnapshot.child(MotorContract.Waypoints.ROUTE_ID).getValue().toString());
+                                contentValue.put(MotorContract.Waypoints.START_NAME, messageSnapshot.child(MotorContract.Waypoints.START_NAME).getValue().toString());
+                                contentValue.put(MotorContract.Waypoints.START_LAT, messageSnapshot.child(MotorContract.Waypoints.START_LAT).getValue().toString());
+                                contentValue.put(MotorContract.Waypoints.START_LONG, messageSnapshot.child(MotorContract.Waypoints.START_LONG).getValue().toString());
+                                contentValue.put(MotorContract.Waypoints.DEST_NAME, messageSnapshot.child(MotorContract.Waypoints.DEST_NAME).getValue().toString());
+                                contentValue.put(MotorContract.Waypoints.DEST_LAT, messageSnapshot.child(MotorContract.Waypoints.DEST_LAT).getValue().toString());
+                                contentValue.put(MotorContract.Waypoints.DEST_LONG, messageSnapshot.child(MotorContract.Waypoints.DEST_LONG).getValue().toString());
+                                contentValue.put(MotorContract.Waypoints.MODE, messageSnapshot.child(MotorContract.Waypoints.MODE).getValue().toString());
+                                contentValue.put(MotorContract.Waypoints.ROUTE_DURATION, messageSnapshot.child(MotorContract.Waypoints.ROUTE_DURATION).getValue().toString());
+                                contentValue.put(MotorContract.Waypoints.ROUTE_DISTANCE, messageSnapshot.child(MotorContract.Waypoints.ROUTE_DISTANCE).getValue().toString());
+
+                                getApplicationContext().getContentResolver().insert(waypointUri, contentValue);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError firebaseError) {
+                        }
+                    });
+                }
 
                 Intent intent = new Intent(this, work.technie.motonavigator.activity.BaseActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

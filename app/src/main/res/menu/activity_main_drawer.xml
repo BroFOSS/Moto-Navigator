@@ -28,6 +28,11 @@
             android:id="@+id/nav_directions"
             android:icon="@drawable/ic_navigation_black_36dp"
             android:title="@string/drive" />
+
+        <item
+            android:id="@+id/nav_backup"
+            android:icon="@drawable/ic_backup"
+            android:title="@string/backup" />
     </group>
 
     <group
