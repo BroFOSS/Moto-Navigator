@@ -658,6 +658,7 @@ public class MapFragment extends Fragment {
         final Location[] newLocation = {null};
         final FlagGPSOneTime gps = new FlagGPSOneTime();
         if (enabled) {
+            Toast.makeText(mActivity,"Loading current location",Toast.LENGTH_SHORT).show();
             map.setMyLocationEnabled(true);
             locationServices.addLocationListener(new LocationListener() {
                 @Override
@@ -673,9 +674,12 @@ public class MapFragment extends Fragment {
                         IconFactory iconFactory = IconFactory.getInstance(mActivity);
                         Drawable iconDrawable = ContextCompat.getDrawable(mActivity, R.drawable.default_marker);
                         Icon icon = iconFactory.fromDrawable(iconDrawable);
+                        Activity activity = getActivity();
+                        if (isAdded() && activity != null) {
+                            markerOrigin = map.addMarker(new MarkerOptions()
+                                    .position(new LatLng(location.getLatitude(), location.getLongitude())).title(getString(R.string.origin)).icon(icon));
+                        }
 
-                        markerOrigin = map.addMarker(new MarkerOptions()
-                                .position(new LatLng(location.getLatitude(), location.getLongitude())).title(getString(R.string.origin)).icon(icon));
 
 
                         markerOrigin.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
